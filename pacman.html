@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Sanna Olsson PacMan</title>
+	<link rel="stylesheet" type="text/css" href="pacman.css">
+	
+</head>
+<body>
+	<div id='world'>
+
+	</div>
+</body>
+<script>
+	var coinsLeft = 148;
+
+	// Skapar en pacman-player på position x,y
+	pacman = {
+		x: 10,
+		y: 11
+	}
+
+	// Skapar en ghost-enemy på position x,y
+	ghost = {
+		x: 22,
+		y: 1
+	}
+
+	// 1 => <div class='wall'></div>
+	// 2 => <div class='coin'></div>
+	// 3 => <div class='ground'></div>
+	// 4 => <div class='ghost'></div>
+	// 5 => <div class='pacman'></div>
+
+	// Detta är spelplanen, varje nummer representerar ett spelobjekt, se kommentar ovan
+	gamePlan = [
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+		[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,1],
+		[1,2,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,2,1],
+		[1,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,1,2,2,2,2,1],
+		[1,1,1,1,2,1,1,1,1,2,2,1,1,2,2,1,1,1,1,2,1,1,1,1],
+		[1,2,2,2,2,1,2,2,2,2,1,1,1,1,2,2,2,2,1,2,2,2,2,1],
+		[1,2,1,1,2,1,2,1,1,2,1,1,1,1,2,1,1,2,1,2,1,1,2,1],
+		[1,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
+		[1,2,1,1,2,1,2,2,2,2,1,2,2,1,2,2,2,2,1,2,1,1,2,1],
+		[1,2,1,1,2,1,2,1,1,2,1,2,2,1,2,1,1,2,1,2,1,1,2,1],
+		[1,2,1,1,2,1,2,1,1,2,1,2,2,1,2,1,1,2,1,2,1,1,2,1],
+		[1,2,2,2,2,2,2,2,2,2,5,2,2,2,2,2,2,2,2,2,2,2,2,1],
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],	
+	]
+
+	// Skapar en variabel som vi använder för att "skapa HTML-kod" i vår div-tag
+	var myVar = document.getElementById('world');
+
+	// Ritar upp spelplanen. Loopar igenom hela min gamePlan och "skapar HTML-kod" för varje spelobjekt
+	function drawGame(){
+		myVar.innerHTML = '';
+		for(var i = 0; i < gamePlan.length ; i++) {
+			for(var j = 0; j < gamePlan[i].length ; j++) {
+				if (gamePlan[i][j] === 1) {
+					myVar.innerHTML += "<div class='wall'></div>";
+				}
+				else if (gamePlan[i][j] === 2) {
+					myVar.innerHTML += "<div class='coin'></div>";
+				}
+				else if (gamePlan[i][j] === 3) {
+					myVar.innerHTML += "<div class='ground'></div>";
+				}
+				else if (gamePlan[i][j] === 4) {
+					myVar.innerHTML += "<div class='ghost'></div>";
+				}
+				else if (gamePlan[i][j] === 5) {
+					myVar.innerHTML += "<div class='pacman'></div>";
+				}
+			}
+			myVar.innerHTML += "<br>";
+		}
+	}
+
+	drawGame();
+
+
+	// När spelaren klickar på en tangent körs denna funktionen
+	document.onkeydown = function(event){
+		// skapar två variabler
+		var check = 0;
+		var randomMove = 0;
+
+		// Körs så länge som check är 0 vilket innebär att vi inte har hittat ett håll som spöket kan förflytta sig
+		while(check == 0){
+
+			// Genererar ett tal mellan 37-40 vilket motsvarar piltangenterna
+			randomMove = Math.floor(Math.random() * 4) + 37;
+
+			// Om talet är 37 flyttas spöket till vänster
+			if (randomMove === 37) {
+
+				// Om det inte är en vägg till vänster
+				if (gamePlan[ghost.y][ghost.x-1] !== 1) {
+
+					// Om det är ett coin till vänster så flyttas spöket till vänster och efterlämnar sig ett coin
+					if (gamePlan[ghost.y][ghost.x-1] === 2) {
+						gamePlan[ghost.y][ghost.x] = 2;
+						ghost.x = ghost.x - 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+
+					// Annars flyttar spöket till vänster och efterlämnar sig en ground
+					else{
+						gamePlan[ghost.y][ghost.x] = 3;
+						ghost.x = ghost.x - 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+					// Sätter check till 1 för att veta att vi lyckats flytta spöket till en ny position och behöver därför inte loopa igen
+					check = 1;
+				}
+			}
+				
+			
+			// Om talet är 38 flyttas spöket uppåt
+			if (randomMove === 38) {
+
+				// Om det inte är en vägg uppåt
+				if (gamePlan[ghost.y-1][ghost.x] !== 1) {
+
+					// Om det är ett coin ovanför så flyttas spöket uppåt och efterlämnar sig ett coin
+					if (gamePlan[ghost.y-1][ghost.x] === 2) {
+						gamePlan[ghost.y][ghost.x] = 2;
+						ghost.y = ghost.y - 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+
+					// Annars flyttar spöket till vänster och efterlämnar sig en ground
+					else{
+						gamePlan[ghost.y][ghost.x] = 3;
+						ghost.y = ghost.y - 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+					// Sätter check till 1 för att veta att vi lyckats flytta spöket till en ny position och behöver därför inte loopa igen
+					check = 1;
+				}
+			}
+
+			// Om talet är 39 flyttas spöket till höger
+			if (randomMove === 39) {
+
+				// Om det inte är en vägg till höger
+				if (gamePlan[ghost.y][ghost.x+1] !== 1) {
+
+					// Om det är ett coin till häger så flyttas spöket till höger och efterlämnar sig ett coin
+					if (gamePlan[ghost.y][ghost.x+1] === 2) {
+						gamePlan[ghost.y][ghost.x] = 2;
+						ghost.x = ghost.x + 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+
+					// Annars flyttar spöket till höger och efterlämnar sig en ground
+					else{
+						gamePlan[ghost.y][ghost.x] = 3;
+						ghost.x = ghost.x + 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+					// Sätter check till 1 för att veta att vi lyckats flytta spöket till en ny position och behöver därför inte loopa igen
+					check = 1;
+				}
+			}
+
+			// Om talet är 40 flyttas spöket nedåt
+			if (randomMove === 40) {
+
+				// Om det inte är en vägg nedåt
+				if (gamePlan[ghost.y+1][ghost.x] !== 1) {
+
+					// Om det är ett coin nedanför så flyttas spöket neråt och efterlämnar sig ett coin
+					if (gamePlan[ghost.y+1][ghost.x] === 2) {
+						gamePlan[ghost.y][ghost.x] = 2;
+						ghost.y = ghost.y + 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+
+					// Annars flyttar spöket neråt och efterlämnar sig en ground
+					else{
+						gamePlan[ghost.y][ghost.x] = 3;
+						ghost.y = ghost.y + 1;
+						gamePlan[ghost.y][ghost.x] = 4;
+					}
+					// Sätter check till 1 för att veta att vi lyckats flytta spöket till en ny position och behöver därför inte loopa igen
+					check = 1;
+				}
+			}
+
+		}
+
+		drawGame();
+
+
+		// Om användaren har klickat på vänsterpilen blir keyCode värdet 37
+		if (event.keyCode === 37){
+
+			// Kollar ifall det är en vägg till vänster
+			if ( gamePlan[pacman.y][pacman.x-1] !== 1){
+
+				// Kollar ifall det är ett spöke till vänster. Om det är det så kommer en alert som säger Game over
+				if ( gamePlan[pacman.y][pacman.x-1] === 4){
+					alert("Game over");
+				}
+
+				// Kollar om det är ett coin till vänster. Ifall det är de drar jag av 1 från coinsLeft för att hålla reda på när användaren vinner
+				// Sedan efterlämnar sig pacman en ground och flyttar ett steg åt vänster
+				if (gamePlan[pacman.y][pacman.x-1] === 2) {
+					coinsLeft--;
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.x = pacman.x - 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+
+				// Ifall det inte var ett coin till vänster så efterlämnar sig pacman en ground och vi drar inte av något från coinsLeft
+				else{
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.x = pacman.x - 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+				
+			}
+		}
+
+		// Om användaren har klickat på uppåtpilen blir keyCode värdet 38
+		else if (event.keyCode === 38){
+
+			// Kollar ifall det är en vägg ovanför
+			if ( gamePlan[pacman.y-1][pacman.x] !== 1){
+
+				// Kollar ifall det är ett spöke ovanför. Om det är det så kommer en alert som säger Game over
+				if ( gamePlan[pacman.y-1][pacman.x] === 4){
+					alert("Game over");
+				}
+				// Kollar om det är ett coin ovanför. Ifall det är de drar jag av 1 från coinsLeft för att hålla reda på när användaren vinner
+				// Sedan efterlämnar sig pacman en ground och flyttar ett steg uppåt
+				if (gamePlan[pacman.y-1][pacman.x] === 2) {
+					coinsLeft--;
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.y = pacman.y - 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+
+				// Ifall det inte var ett coin ovanför så efterlämnar sig pacman en ground och vi drar inte av något från coinsLeft
+				else{
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.y = pacman.y - 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+				
+			}
+		}
+
+		// Om användaren har klickat på högerpilen blir keyCode värdet 39
+		else if (event.keyCode === 39){
+
+			// Kollar ifall det är en vägg till höger
+			if ( gamePlan[pacman.y][pacman.x+1] !== 1){
+
+				// Kollar ifall det är ett spöke till höger. Om det är det så kommer en alert som säger Game over
+				if ( gamePlan[pacman.y][pacman.x+1] === 4){
+					alert("Game over");
+				}
+
+				// Kollar om det är ett coin till höger. Ifall det är de drar jag av 1 från coinsLeft för att hålla reda på när användaren vinner
+				// Sedan efterlämnar sig pacman en ground och flyttar ett steg åt höger
+				if (gamePlan[pacman.y][pacman.x+1] === 2) {
+					coinsLeft--;
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.x = pacman.x + 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+
+				// Ifall det inte var ett coin till höger så efterlämnar sig pacman en ground och vi drar inte av något från coinsLeft
+				else{
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.x = pacman.x + 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+				
+			}
+		}
+
+		// Om användaren har klickat på nedåtpilen blir keyCode värdet 40
+		else if (event.keyCode === 40){
+
+			// Kollar ifall det är en vägg nedanför
+			if ( gamePlan[pacman.y+1][pacman.x] !== 1){
+
+				// Kollar ifall det är ett spöke nedanför. Om det är det så kommer en alert som säger Game over
+				if ( gamePlan[pacman.y+1][pacman.x] === 4){
+					alert("Game over");
+				}
+
+				// Kollar om det är ett coin nedanför. Ifall det är de drar jag av 1 från coinsLeft för att hålla reda på när användaren vinner
+				// Sedan efterlämnar sig pacman en ground och flyttar ett steg neråt
+				if (gamePlan[pacman.y+1][pacman.x] === 2) {
+					coinsLeft--;
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.y = pacman.y + 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+
+				// Ifall det inte var ett coin nedanför så efterlämnar sig pacman en ground och vi drar inte av något från coinsLeft
+				else{
+					gamePlan[pacman.y][pacman.x] = 3;
+					pacman.y = pacman.y + 1;
+					gamePlan[pacman.y][pacman.x] = 5;
+				}
+				
+			}
+		}
+
+		// Kollar ifall coinsLeft är 0 och då har användaren vunnit för den har tagit alla coins
+		if (coinsLeft === 0) {
+			alert("Congratulations, you won the game!");
+		}
+
+		drawGame();
+	}
+</script>
+</html>
